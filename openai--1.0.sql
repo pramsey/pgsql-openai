@@ -1,5 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS openai;
 
+
 CREATE OR REPLACE FUNCTION chunk(input_text text, max_words int default 256)
 RETURNS SETOF text
 LANGUAGE 'plpgsql'
@@ -56,6 +57,7 @@ BEGIN
     END IF;
 END;
 $$;
+
 
 CREATE OR REPLACE FUNCTION openai.models()
 RETURNS TABLE (
@@ -125,6 +127,8 @@ BEGIN
     FROM jsonb_array_elements(js->'data') AS elem;
 END;
 $$;
+
+
 CREATE OR REPLACE FUNCTION openai.prompt(
     context text, 
     prompt text, 
@@ -199,6 +203,7 @@ BEGIN
 END;
 $$;
 
+
 CREATE OR REPLACE FUNCTION openai.vector(
     input text, 
     model text DEFAULT NULL)
@@ -266,11 +271,8 @@ BEGIN
         RAISE EXCEPTION 'OpenAI: request failed with status %, message: %', res.status, js->'error'->>'message';
     END IF;
 
-
-    -- RAISE DEBUG '%', js->'data'->0->'embedding';
-    js := res.content::jsonb;
     -- Return query with extracted data from JSON response
-
+    js := res.content::jsonb;
     vec := js->'data'->0->'embedding';
     RETURN vec;
 

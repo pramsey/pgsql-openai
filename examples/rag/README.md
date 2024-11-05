@@ -9,8 +9,6 @@ This example shows how to use AI embeddings along with [pgvector](https://github
 The `llama3.1:latest` is 4.7Gb in size, and within that envelope it encodes an incredibly large amount of information about the world, but not so much knowledge that it knows the details of STTNG episodes. Which is a shame.
 
 ```sql
-
-
 SELECT openai.prompt(
 	'You are a science fiction expert',
 	'What is the Star Trek episode where Deanna and her mother are kidnapped?'
