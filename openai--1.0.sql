@@ -198,6 +198,7 @@ BEGIN
     RETURN js->'choices'->0->'message'->>'content';
 END;
 $$;
+
 CREATE OR REPLACE FUNCTION openai.vector(
     input text, 
     model text DEFAULT NULL)
