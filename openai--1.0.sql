@@ -1,6 +1,13 @@
 CREATE SCHEMA IF NOT EXISTS openai;
 
-
+--
+-- Split input text into chunks of a maximum size, to create
+-- blocks of content that can be fed into a RAG system. This
+-- function is way too primitive to document or publicize, as
+-- practical chunking really needs to be tightly tailored to the
+-- input document format, to get tight and contextually consistent
+-- chunks.
+--
 CREATE OR REPLACE FUNCTION chunk(input_text text, max_words int default 256)
 RETURNS SETOF text
 LANGUAGE 'plpgsql'
@@ -58,7 +65,9 @@ BEGIN
 END;
 $$;
 
-
+--
+-- List all the models being served at the API endpoint
+--
 CREATE OR REPLACE FUNCTION openai.models()
 RETURNS TABLE (
     id text,
@@ -128,7 +137,9 @@ BEGIN
 END;
 $$;
 
-
+--
+-- Send a prompt and system context to the LLM for a reponse
+--
 CREATE OR REPLACE FUNCTION openai.prompt(
     context text, 
     prompt text, 
@@ -166,6 +177,7 @@ BEGIN
     uri := api_uri || chat_path;
     RAISE DEBUG 'OpenAI: querying %', uri;
 
+    -- https://platform.openai.com/docs/guides/text-generation#building-prompts
     js := jsonb_build_object('model', model, 
         'messages', json_build_array(
             jsonb_build_object('role', 'system', 'content', context),
@@ -203,7 +215,12 @@ BEGIN
 END;
 $$;
 
-
+--
+-- Get the embedding for a piece of content. Make sure
+-- you are using an embedding model with this function.
+-- OpenAI will complain if you don't, Ollama will just
+-- give you the (very suboptimal) embedding.
+--
 CREATE OR REPLACE FUNCTION openai.vector(
     input text, 
     model text DEFAULT NULL)
@@ -241,6 +258,7 @@ BEGIN
     uri := api_uri || emb_path;
     RAISE DEBUG 'OpenAI: querying %', uri;
 
+    -- https://platform.openai.com/docs/guides/embeddings
     js := jsonb_build_object(
             'input', input,
             'model', model,
