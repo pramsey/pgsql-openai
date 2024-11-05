@@ -1,0 +1,13 @@
+*.o
+*.so
+*.a
+*.pc
+*.dylib
+regression.diffs
+regression.out
+results/
+tmp_check/
+tmp_check_iso/
+output_iso/
+log/
+.DS_Store

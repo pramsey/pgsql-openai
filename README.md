@@ -70,6 +70,8 @@ If you have a workstation with a reasonable amount of memory (16GB or more) you 
 
 ### Basic Examples
 
+Read back the settings your database is using.
+
 ```sql 
 SHOW openai.api_uri;
 ```
@@ -78,6 +80,7 @@ SHOW openai.api_uri;
 ----------------------------
  http://127.0.0.1:11434/v1/
 ```
+List all the models running behind the API you are connecting to. If it is a local API like [Ollama](https://ollama.com/), probably a short list. If it is a hosted API like OpenAI, probably a long one.
 
 ```sql
 SELECT openai.models();
@@ -90,6 +93,8 @@ SELECT * FROM openai.models();
  llama3.1:latest          | model  | 2024-07-25 22:45:02 | library
 ```
 
+Query the model about factual matters. For small models or obscure facts, this may likely return hallucinated results.
+
 ```sql
 SELECT openai.prompt(
 	'You are a very smart physics teacher.',
@@ -101,6 +106,26 @@ A classic question! The speed of light, in a vacuum (a completely
 empty space with no air or matter), is approximately... 
 (dramatic pause) ...299,792,458 meters per second!                                +
 ```
+
+Use the model to summarize a free-form text input. In the extreme, a sentiment analysis prompt can instruct the model to use a fixed set of output tokens, for nice programmatic filtering of free-form inputs.
+
+```sql
+SELECT openai.prompt(
+  'You are an advanced sentiment analysis model. Read the given 
+   feedback text carefully and classify it as one of the 
+   following sentiments only: "positive", "neutral", or 
+   "negative". Respond with exactly one of these words 
+   and no others, using lowercase and no punctuation',
+  'I enjoyed the setting and the service and the bisque was 
+   great.' );
+```
+```
+  prompt  
+----------
+ positive
+```
+
+Calculate the embedding vector for a given piece of input. Useful for "find the most similar" queries or as an input to [retrieval augmented generation](https://en.wikipedia.org/wiki/Retrieval-augmented_generation) (RAG) systems.
 
 ```sql
 SELECT openai.vector('A lovely orange pumpkin pie recipe.');
