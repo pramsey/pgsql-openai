@@ -296,3 +296,117 @@ BEGIN
 
 END;
 $$;
+
+
+--
+-- Use an image as your context, and have the model
+-- comment on it with your prompt. Describe contents,
+-- characterize composition, evaluate colors, any
+-- visual question.
+-- Keep image size small if you can, to avoid higher
+-- charges.
+-- Uses the openai.image_model or supplied model.
+-- Make sure you use a model capable of accepting
+-- image input.
+--
+CREATE OR REPLACE FUNCTION openai.image(
+    prompt text,
+    image_url text,
+    model text DEFAULT NULL)
+RETURNS text
+LANGUAGE 'plpgsql'
+AS $$
+DECLARE
+    js jsonb;
+    req http_request;
+    res http_response;
+    api_key text;
+    api_uri text;
+    uri text;
+    chat_path text := 'chat/completions';
+BEGIN
+
+    -- Fetching settings for API key, URI
+    api_key := current_setting('openai.api_key', true);
+    api_uri := current_setting('openai.api_uri', true);
+
+    IF api_uri IS NULL THEN
+        RAISE EXCEPTION 'OpenAI: the ''openai.api_uri'' is not currently set';
+    END IF;
+
+    IF api_key IS NULL THEN
+        RAISE EXCEPTION 'OpenAI: the ''openai.api_key'' is not currently set';
+    END IF;
+
+    -- User-specified model over-rides GUC
+    IF model IS NULL THEN
+        model := current_setting('openai.image_model', true);
+    END IF;
+
+    uri := api_uri || chat_path;
+    RAISE DEBUG 'OpenAI: querying %', uri;
+
+    -- https://platform.openai.com/docs/guides/vision#quickstart
+    js := jsonb_build_object('model', model,
+        'messages', json_build_array(
+            jsonb_build_object('role', 'user', 'content',
+                json_build_array(
+                    json_build_object('type', 'text', 'text', 'look at this image'),
+                    json_build_object('type', 'text', 'text', prompt),
+                    json_build_object('type', 'image_url', 'image_url',
+                        json_build_object('url', image_url)))
+            )
+        ));
+
+    RAISE DEBUG 'OpenAI: payload %', js;
+
+    -- Construct the HTTP request and fetch response
+    req := (
+        'POST',
+        uri,
+        ARRAY[http_header('Authorization', 'Bearer ' || api_key)],
+        'application/json',
+        js
+    )::http_request;
+
+    -- Execute the HTTP request
+    res := http(req);
+
+    -- Log the response for debugging purposes
+    RAISE DEBUG 'OpenAI: Response Status: %', res.status;
+    RAISE DEBUG 'OpenAI: Content: %', res.content;
+
+    -- Check if the response status code is not 200
+    IF res.status != 200 THEN
+        js := res.content::jsonb;
+        RAISE EXCEPTION 'OpenAI: request failed with status %, message: %', res.status, js->'error'->>'message';
+    END IF;
+
+    -- Return query with extracted data from JSON response
+    js := res.content::jsonb;
+    RETURN js->'choices'->0->'message'->>'content';
+END;
+$$;
+
+
+--
+-- When provided with a local binary image, convert it to
+-- text using base64 encoding and then hand that to the API.
+-- When using Ollama, this is the only option for image
+-- description.
+--
+CREATE OR REPLACE FUNCTION openai.image(
+    prompt text,
+    image bytea,
+    model text DEFAULT NULL)
+RETURNS text
+LANGUAGE 'plpgsql'
+AS $$
+DECLARE
+    b64 text;
+BEGIN
+    b64 := encode(image, 'base64');
+
+    RETURN openai.image(prompt, 'data:image/jpeg;base64,' || b64, model);
+END;
+$$;

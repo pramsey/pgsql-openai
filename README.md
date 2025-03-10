@@ -140,6 +140,32 @@ SELECT openai.vector('A lovely orange pumpkin pie recipe.');
  0.0008801813, -0.0006236545, 0.016922941, -0.011781357]
 ```
 
+Analyze the contents of an image, referencing either a local (`bytea` in the database) or remote (URL) image. Note that Ollama does not support remote images, so you will have to download the image using `http_get` first, and then pass the `bytea` into the function.
+
+```sql
+SET openai.image_model = 'gpt-4-turbo';
+
+SELECT openai.image(
+    'Is anyone in this picture wearing red?',
+    'https://upload.wikimedia.org/wikipedia/commons/0/03/Wiki-picnic%2C_June_2016_006.jpg');
+```
+
+To download the image, do something like this.
+
+```sql
+CREATE TABLE images (pk serial, img bytea);
+
+WITH req AS (
+  SELECT http_get('https://upload.wikimedia.org/wikipedia/commons/0/03/Wiki-picnic%2C_June_2016_006.jpg') AS rsp
+)
+INSERT INTO images (img)
+  SELECT (text_to_bytea((req.rsp).content))
+  FROM req;
+
+SELECT openai.image('Is anyone in this picture wearing red?', img)
+  FROM images;
+```
+
 ## Debugging
 
 To see what's going on inside the functions, set the debug level:
@@ -151,7 +177,7 @@ SET client_min_messages = debug;
 To work around HTTP timeouts, increase the timeout interval:
 
 ```sql
-SELECT http_set_curlopt('CURLOPT_TIMEOUT', '10');
+SET http_set_curlopt('CURLOPT_TIMEOUT', '10');
 ```
 
 
