@@ -6,7 +6,7 @@ This example shows how to use AI embeddings along with [pgvector](https://github
 
 ## Limitations of Models
 
-The `llama3.1:latest` is 4.7Gb in size, and within that envelope it encodes an incredibly large amount of information about the world, but not so much knowledge that it knows the details of STTNG episodes. Which is a shame.
+The `llama3.2:latest` is 2.0Gb in size, and within that envelope it encodes an incredibly large amount of information about the world, but not so much knowledge that it knows the details of STTNG episodes. Which is a shame.
 
 ```sql
 SELECT openai.prompt(
@@ -15,18 +15,12 @@ SELECT openai.prompt(
 	);
 ```
 ```
-A great question about The Next Generation!
-
 I believe you might be thinking of the Star Trek: The Next Generation 
 episode "Dark Page", which is Season 5, Episode 9. In this episode, 
 Lwaxana Troi (Deanna's mother) visits the Enterprise and plans to 
 attend a ceremony on Betazed with her husband. However, she is 
 kidnapped by a group of space pirates who want to use her as bait 
 to lure her son Jori-Troi back onto their ship.
-                                                                                                                                                                                                                                                                                                                                                                                             +
-While it is true that Jori-Troi, Lwaxana's son, is indeed kidnapped 
-in this episode, it could also be argued that Deanna Troi would 
-have some emotional connection to the event.
 ```
 
 This is... a pure halucination. It is "trekish" but it references an episode that doesn't exist, and characters that don't exist either. We need a way to inject more facts into the LLM process.

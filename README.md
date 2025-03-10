@@ -17,23 +17,23 @@ The most obvious uses for AI in the database are:
 * Set up an [OpenAI API key](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key)
 * Create a working database
 * Enable the HTTP extension
-  	```sql
-  	CREATE EXTENSION http;
-  	```
+    ```sql
+    CREATE EXTENSION http;
+    ```
 * Set the up the session keys
-  	```sql
-	SET openai.api_key = 'your_api_key_here';
-	SET openai.api_uri = 'https://api.openai.com/v1/';
-	SET openai.prompt_model = 'gpt-4o-mini';
-	SET openai.embedding_model = 'text-embedding-3-small';
-	```
+    ```sql
+    SET openai.api_key = 'your_api_key_here';
+    SET openai.api_uri = 'https://api.openai.com/v1/';
+    SET openai.prompt_model = 'gpt-4o-mini';
+    SET openai.embedding_model = 'text-embedding-3-small';
+    ```
 * (Optionally) make the keys persistent
-  	```sql
-	ALTER DATABASE your_db SET openai.api_key = 'your_api_key_here';
-	ALTER DATABASE your_db SET openai.api_uri = 'https://api.openai.com/v1/';
-	ALTER DATABASE your_db SET openai.prompt_model = 'gpt-4o-mini';
-	ALTER DATABASE your_db SET openai.embedding_model = 'text-embedding-3-small';
-	```
+    ```sql
+    ALTER DATABASE your_db SET openai.api_key = 'your_api_key_here';
+    ALTER DATABASE your_db SET openai.api_uri = 'https://api.openai.com/v1/';
+    ALTER DATABASE your_db SET openai.prompt_model = 'gpt-4o-mini';
+    ALTER DATABASE your_db SET openai.embedding_model = 'text-embedding-3-small';
+    ```
 
 ### Using Ollama
 
@@ -42,23 +42,23 @@ If you have a workstation with a reasonable amount of memory (16GB or more) you 
 * [Download Ollama](https://ollama.com) for your workstation
 
 * Verify you can run `ollama` 
-	* then `ollama pull llama3.1:latest`
-	* and `ollama pull mxbai-embed-large`
+    * then `ollama pull llama3.2:latest`
+    * and `ollama pull mxbai-embed-large`
 
 * Set the up the session keys
-  	```sql
-	SET openai.api_uri = 'http://127.0.0.1:11434/v1/';
-	SET openai.api_key = 'none';
-	SET openai.prompt_model = 'llama3.1:latest';
-	SET openai.embedding_model = 'mxbai-embed-large';
-	```
+    ```sql
+    SET openai.api_uri = 'http://127.0.0.1:11434/v1/';
+    SET openai.api_key = 'none';
+    SET openai.prompt_model = 'llama3.2:latest';
+    SET openai.embedding_model = 'mxbai-embed-large';
+    ```
 * (Optionally) make the keys persistent
-  	```sql
-	ALTER DATABASE your_db SET openai.api_uri = 'http://127.0.0.1:11434/v1/';
-	ALTER DATABASE your_db SET openai.api_key = 'none';
-	ALTER DATABASE your_db SET openai.prompt_model = 'llama3.1:latest';
-	ALTER DATABASE your_db SET openai.embedding_model = 'mxbai-embed-large';
-	```
+    ```sql
+    ALTER DATABASE your_db SET openai.api_uri = 'http://127.0.0.1:11434/v1/';
+    ALTER DATABASE your_db SET openai.api_key = 'none';
+    ALTER DATABASE your_db SET openai.prompt_model = 'llama3.2:latest';
+    ALTER DATABASE your_db SET openai.embedding_model = 'mxbai-embed-large';
+    ```
 
 ## Usage
 
@@ -90,16 +90,16 @@ SELECT * FROM openai.models();
             id            | object |       created       | owned_by 
 --------------------------+--------+---------------------+----------
  mxbai-embed-large:latest | model  | 2024-11-04 20:48:39 | library
- llama3.1:latest          | model  | 2024-07-25 22:45:02 | library
+ llama3.2:latest          | model  | 2024-07-25 22:45:02 | library
 ```
 
 Query the model about factual matters. For small models or obscure facts, this may likely return hallucinated results.
 
 ```sql
 SELECT openai.prompt(
-	'You are a very smart physics teacher.',
-	'What is the speed of light?'
-	);
+    'You are a very smart physics teacher.',
+    'What is the speed of light?'
+    );
 ```
 ```
 A classic question! The speed of light, in a vacuum (a completely 

@@ -8,7 +8,7 @@ CREATE SCHEMA IF NOT EXISTS openai;
 -- input document format, to get tight and contextually consistent
 -- chunks.
 --
-CREATE OR REPLACE FUNCTION chunk(input_text text, max_words int default 256)
+CREATE OR REPLACE FUNCTION openai.chunk(input_text text, max_words int default 256)
 RETURNS SETOF text
 LANGUAGE 'plpgsql'
 AS $$
