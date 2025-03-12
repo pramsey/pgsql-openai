@@ -238,6 +238,10 @@ DECLARE
     vec text;
 BEGIN
 
+    IF input IS NULL THEN
+        RETURN NULL;
+    END IF;
+
     -- Fetching settings for API key, URI
     api_key := current_setting('openai.api_key', true);
     api_uri := current_setting('openai.api_uri', true);
